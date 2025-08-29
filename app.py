@@ -25,7 +25,10 @@ PROMPTS = {
 
     "business": """First, transcribe the audio accurately.
     
-    Return your response strictly in JSON with two fields: 
+    Return your response strictly in JSON with two fields.
+    Respond ONLY in the following format, without any extra text:
+
+    ```json
     {
       "transcription": "... full word-for-word transcription ...",
       "summary": "... structured summary notes ..."
