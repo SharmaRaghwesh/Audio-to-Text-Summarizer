@@ -3,6 +3,7 @@ import google.generativeai as genai
 from pydub import AudioSegment
 import tempfile
 import os
+import json
 
 # Try from environment first
 api_key = os.getenv("GEMINI_API_KEY")
@@ -22,7 +23,14 @@ PROMPTS = {
     - Action items with assignee (if mentioned) and deadlines (if any).
     """,
 
-    "business": """First, transcribe the audio accurately.  
+    "business": """First, transcribe the audio accurately.
+    
+    Return your response strictly in JSON with two fields: 
+    {
+      "transcription": "... full word-for-word transcription ...",
+      "summary": "... structured summary notes ..."
+    }
+    
     Then provide a structured summary in this format:
 
     📌 **Meeting Summary**
@@ -65,7 +73,17 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
         {"mime_type": "audio/wav", "data": open(audio_file, "rb").read()},
         prompt
     ])
-    return response.text
+
+    # Try to parse JSON response
+    try:
+        result = json.loads(response.text)
+        transcription = result.get("transcription", "")
+        summary = result.get("summary", "")
+    except Exception:
+        # fallback if model outputs plain text
+        transcription, summary = "", response.text
+
+    return transcription, summary
 
 
 # --- Streamlit UI ---
@@ -94,35 +112,38 @@ if uploaded_file and api_key:
 
     
     # Run transcription + summarization
-    result = transcribe_and_summarize(wav_path, api_key, style)
-    
+    # result = transcribe_and_summarize(wav_path, api_key, style)
+    transcription, summary = transcribe_and_summarize(wav_path, api_key, style)
     st.success("✅ Done!")
+
     
     # --- Full Transcription (scrollable) ---
     st.subheader("📝 Full Transcription")
-    st.markdown(
-    f"""
-    <div style="
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 1em;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #f9f9f9;
-        white-space: pre-wrap;
-        font-family: monospace;
-    ">
-    {result}
-    </div>
-    """,
-    unsafe_allow_html=True
-    )
+    if transcription.strip():
+        st.markdown(
+        f"""
+        <div style="
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            font-family: monospace;
+        ">
+        {transcription}
+        </div>
+        """,
+        unsafe_allow_html=True
+        )
+    else:
+         st.info("⚠️ No transcription available.")
     
     # --- Summary Notes (clean, scannable) ---
     st.subheader("📌 Meeting Summary Notes")
-    st.markdown(result)
+    st.markdown(summary)
     
-    st.success("✅ Done!")
 
     # Cleanup
     os.remove(wav_path)
