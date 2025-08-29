@@ -70,8 +70,6 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
 # --- Streamlit UI ---
 st.title("🎙️ AI Meeting Transcriber & Summarizer")
-
-api_key = st.text_input("Enter your Gemini API Key", type="password")
 style = st.selectbox("Choose summary style", ["minimal", "business", "advanced"])
 uploaded_file = st.file_uploader("Upload an audio/video file", type=["wav", "mp3", "m4a", "mp4"])
 
