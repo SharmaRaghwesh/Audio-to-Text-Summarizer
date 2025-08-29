@@ -15,7 +15,12 @@ if not api_key:
 
 # --- Prompt Templates ---
 PROMPTS = {
-    "minimal": """Transcribe the meeting audio word-for-word.  
+    "minimal": """Transcribe the meeting audio word-for-word.
+    
+    "Transcribe all spoken words in the audio using English letters (Roman script), 
+    even if the word is Hindi. Preserve English words as they are. 
+    Do NOT convert English words into Hindi script."
+  
     Then summarize it into clear, well-structured meeting notes.  
     Include:
     - Key discussion points
@@ -24,6 +29,10 @@ PROMPTS = {
     """,
 
     "business": """First, transcribe the audio accurately.
+    
+     "Transcribe all spoken words in the audio using English letters (Roman script), 
+    even if the word is Hindi. Preserve English words as they are. 
+    Do NOT convert English words into Hindi script."
     
     Return your response strictly in JSON with two fields.
     Respond ONLY in the following format, without any extra text:
@@ -51,6 +60,10 @@ PROMPTS = {
     """,
 
     "advanced": """You are an AI meeting assistant.
+    
+     "Transcribe all spoken words in the audio using English letters (Roman script), 
+    even if the word is Hindi. Preserve English words as they are. 
+    Do NOT convert English words into Hindi script."
 
     1. Transcribe the entire meeting audio accurately.  
     2. Then summarize it into structured notes with these sections:
@@ -75,8 +88,8 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     response = model.generate_content([
         {"mime_type": "audio/wav", "data": open(audio_file, "rb").read()},
         prompt
-    ], generation_config={"temperature": 0.0})
-    print(response)
+    ], generation_config={"temperature": 0.7})
+    print(response.text)
 
     # Try to parse JSON response
     transcription, summary = "", ""
