@@ -72,9 +72,11 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     response = model.generate_content([
         {"mime_type": "audio/wav", "data": open(audio_file, "rb").read()},
         prompt
-    ])
+    ], generation_config={"temperature": 0.0})
+    print(response)
 
     # Try to parse JSON response
+    transcription, summary = "", ""
     try:
         result = json.loads(response.text)
         transcription = result.get("transcription", "")
