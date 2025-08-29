@@ -64,3 +64,24 @@ Add a packages.txt file with:
 ffmpeg
 ```
 
+📂 File Structure
+
+```
+├── app.py              # Main Streamlit app
+├── requirements.txt    # Python dependencies
+├── packages.txt        # System packages (ffmpeg for audio conversion)
+├── README.md           # Project documentation
+
+
+```
+🎛️ Summary Styles
+```
+
+Minimal → Quick notes (discussion points, decisions, action items)
+
+Business → Structured summary (purpose, topics, decisions, action items, follow-ups)
+
+Advanced → Detailed meeting assistant (participants, agenda, risks, next steps, etc.)
+
+```
+
