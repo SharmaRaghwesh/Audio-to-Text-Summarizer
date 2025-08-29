@@ -89,7 +89,21 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
         {"mime_type": "audio/wav", "data": open(audio_file, "rb").read()},
         prompt
     ], generation_config={"temperature": 0.7})
-    print(response.text)
+
+
+     # If response.text is JSON, parse it
+    try:
+        data = json.loads(response.text)
+        # Print transcription
+        print("📝 Transcription:\n")
+        print(data.get("transcription", "No transcription found"))
+        print("\n" + "="*80 + "\n")
+        # Print summary
+        print("📌 Meeting Summary:\n")
+        print(data.get("summary", "No summary found"))
+    except json.JSONDecodeError:
+        # If it's not JSON, just print raw text
+        print(response.text)
 
     # Try to parse JSON response
     transcription, summary = "", ""
