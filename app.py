@@ -91,9 +91,38 @@ if uploaded_file and api_key:
             wav_path = tmp_wav.name
 
     st.info("⏳ Processing... this may take a while.")
-    summary = transcribe_and_summarize(wav_path, api_key, style)
+
+    
+    # Run transcription + summarization
+    result = transcribe_and_summarize(wav_path, api_key, style)
+    
     st.success("✅ Done!")
-    st.markdown(summary)
+    
+    # --- Full Transcription (scrollable) ---
+    st.subheader("📝 Full Transcription")
+    st.markdown(
+    f"""
+    <div style="
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 1em;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        white-space: pre-wrap;
+        font-family: monospace;
+    ">
+    {result}
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
+    
+    # --- Summary Notes (clean, scannable) ---
+    st.subheader("📌 Meeting Summary Notes")
+    st.markdown(result)
+    
+    st.success("✅ Done!")
 
     # Cleanup
     os.remove(wav_path)
