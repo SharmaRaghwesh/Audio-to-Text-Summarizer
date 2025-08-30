@@ -37,7 +37,7 @@ PROMPTS = {
     Return your response strictly in JSON with two fields.
     Respond ONLY in the following format, without any extra text:
 
-    ```json
+    json
     {
       "transcription": "... full word-for-word transcription ...",
       "summary": "... structured summary notes ..."
@@ -107,13 +107,13 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Try to parse JSON response
     transcription, summary = "", ""
-    # try:
-    #     result = json.loads(response.text)
-    #     transcription = result.get("transcription", "")
-    #     summary = result.get("summary", "")
-    # except Exception:
-    #     # fallback if model outputs plain text
-    #     transcription, summary = "", response.text
+    try:
+        result = json.loads(response.text)
+        transcription = result.get("transcription", "")
+        summary = result.get("summary", "")
+    except Exception:
+        # fallback if model outputs plain text
+        transcription, summary = "", response.text
 
     return transcription, summary
 
