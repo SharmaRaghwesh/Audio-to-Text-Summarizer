@@ -239,7 +239,7 @@ if uploaded_file and api_key:
             white-space: pre-wrap;
             font-family: monospace;
         ">
-        {transcription}
+        {html.escape(transcription)}
         </div>
         """,
         unsafe_allow_html=True
