@@ -4,6 +4,7 @@ from pydub import AudioSegment
 import tempfile
 import os
 import json
+import re
 
 # Try from environment first
 api_key = os.getenv("GEMINI_API_KEY")
@@ -31,16 +32,13 @@ PROMPTS = {
     "business": """First, transcribe the audio accurately.
     
      "Transcribe all spoken words in the audio using English letters (Roman script), 
-    even if the word is Hindi. Preserve English words as they are. 
-    Do NOT convert English words into Hindi script."
+      even if the word is Hindi. Preserve English words as they are. 
+      Do NOT convert English words into Hindi script."
     
-    Return your response strictly in JSON with two fields.
-    Respond ONLY in the following format, without any extra text:
-
-    json
+    Return your response strictly in **valid JSON** with two fields:
     {
-      "transcription": "... full word-for-word transcription ...",
-      "summary": "... structured summary notes ..."
+      "transcription": "<full transcription, escape all quotes and newlines>",
+      "summary": "<structured summary notes>"
     }
     
     Then provide a structured summary in this format:
@@ -79,6 +77,11 @@ PROMPTS = {
     """
 }
 
+def safe_json_loads(s: str):
+    # Remove unescaped control characters
+    s = re.sub(r"[\x00-\x1f\x7f]", "", s)
+    return json.loads(s)
+
 # --- Transcribe & Summarize Function ---
 def transcribe_and_summarize(audio_file, api_key, style="business"):
     genai.configure(api_key=api_key)
@@ -92,7 +95,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Get raw model text
     raw_text = getattr(response, "text", None) or str(response)
-    # st.text(raw_text)
+    st.code(raw_text, language="json")
     
 
     # Clean ```json fences if present
@@ -107,7 +110,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     # Try to parse JSON response
     transcription, summary = "", ""
     try:
-        result = json.loads(cleaned)
+        result = safe_json_loads(cleaned)
         st.text(result)
         transcription = result.get("transcription", "")
         summary = result.get("summary", "")
