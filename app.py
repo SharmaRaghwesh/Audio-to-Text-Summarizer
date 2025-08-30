@@ -108,6 +108,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     transcription, summary = "", ""
     try:
         result = json.loads(cleaned)
+        st.text(result)
         transcription = result.get("transcription", "")
         summary = result.get("summary", "")
     except Exception:
