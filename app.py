@@ -143,7 +143,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Get raw model text
     raw_text = getattr(response, "text", None) or str(response)
-    st.code(raw_text, language="json")
+    # st.code(raw_text, language="json")
     
 
     # Clean ```json fences if present
@@ -160,7 +160,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     transcription, summary = "", ""
     transcription_text, summary_text = separate_transcription_and_summary(raw_text)
     if transcription_text and summary_text:
-        st.write("the transcription is ",transcription_text)
+        # st.write("the transcription is ",transcription_text)
         transcription = transcription_text
         summary = summary_text
     else:
