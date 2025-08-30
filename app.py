@@ -92,6 +92,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Get raw model text
     raw_text = getattr(response, "text", None) or str(response)
+    print("🔍 RAW MODEL OUTPUT:\n", raw_text)
 
     # Clean ```json fences if present
     cleaned = raw_text.strip()
