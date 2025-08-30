@@ -100,50 +100,34 @@ def safe_extract_json(text: str):
         return None
 def separate_transcription_and_summary(data_string):
     """
-    Separates the transcription and meeting summary from a single string
-    based on the '📌 **Meeting Summary**' delimiter.
-
-    Args:
-        data_string (str): The combined string containing the transcription
-                           and the meeting summary.
-
-    Returns:
-        tuple: A tuple containing two strings: (transcription, summary).
-               Returns (None, None) if the delimiter is not found.
+    Separates transcription and summary from model output.
+    Handles both JSON and Markdown outputs safely.
     """
     delimiter = "📌 **Meeting Summary**"
-    
-    # Check if the delimiter exists in the string
+
     if delimiter in data_string:
-        # Split the string at the delimiter
         parts = data_string.split(delimiter, 1)
-        
-        # The transcription is the first part, inside the JSON.
-        # We need to find the content of the "transcription" key.
+        # Try to extract transcription from JSON block
         json_part = parts[0].strip()
-        
         try:
-            # Safely extract the transcription from the JSON string.
-            # This is a bit complex as the JSON is embedded in a text block.
-            # A more robust method would be to use a regular expression.
             start_index = json_part.find('{')
             end_index = json_part.rfind('}') + 1
             json_content = json_part[start_index:end_index]
-            
-            # Load the JSON and get the transcription
+            # Clean control characters
+            json_content = re.sub(r"[\x00-\x1f\x7f]", "", json_content)
             data = json.loads(json_content)
-            transcription = data.get("transcription", "Transcription key not found.")
-            
-        except (json.JSONDecodeError, IndexError) as e:
-            transcription = f"Could not parse transcription from JSON: {e}"
-        
-        # The summary is the second part
+            transcription = data.get("transcription", "")
+        except Exception:
+            transcription = json_part  # fallback to raw text
         summary = delimiter + parts[1].strip()
-        
         return transcription, summary
     else:
-        print("Delimiter '📌 **Meeting Summary**' not found in the string.")
-        return None, None
+        # If delimiter not found, try extracting JSON transcription directly
+        match = re.search(r'"transcription"\s*:\s*"([^"]+)"', data_string, re.DOTALL)
+        transcription = match.group(1) if match else data_string
+        summary = ""
+        return transcription, summary
+
 
 
 # --- Transcribe & Summarize Function ---
@@ -228,6 +212,7 @@ if uploaded_file and api_key:
     # --- Full Transcription (scrollable) ---
     st.subheader("📝 Full Transcription")
     if transcription.strip():
+        safe_text = html.escape(transcription).replace("\\n", "\n")
         st.markdown(
         f"""
         <div style="
@@ -240,7 +225,7 @@ if uploaded_file and api_key:
             white-space: pre-wrap;
             font-family: monospace;
         ">
-        {html.escape(transcription)}
+        {safe_text}
         </div>
         """,
         unsafe_allow_html=True
