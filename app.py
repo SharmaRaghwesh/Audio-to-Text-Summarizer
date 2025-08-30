@@ -221,9 +221,13 @@ if uploaded_file and api_key:
             padding: 1em;
             border: 1px solid #ddd;
             border-radius: 8px;
-            background-color: #f9f9f9;
+            background-color: #f0f0f0;
+            color: #111; 
             white-space: pre-wrap;
             font-family: monospace;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #888 #f0f0f0;
         ">
         {safe_text}
         </div>
