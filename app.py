@@ -5,6 +5,7 @@ import tempfile
 import os
 import json
 import re
+import html
 
 # Try from environment first
 api_key = os.getenv("GEMINI_API_KEY")
