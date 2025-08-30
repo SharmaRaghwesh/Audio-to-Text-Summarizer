@@ -92,13 +92,16 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Get raw model text
     raw_text = getattr(response, "text", None) or str(response)
-    st.text(raw_text)
+    # st.text(raw_text)
     
 
     # Clean ```json fences if present
     cleaned = raw_text.strip()
     if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`")
+        # Take only the inside of the first fenced block
+        parts = cleaned.split("```")
+        if len(parts) >= 2:
+            cleaned = parts[1]
         cleaned = cleaned.replace("json", "", 1).strip()
 
     # Try to parse JSON response
