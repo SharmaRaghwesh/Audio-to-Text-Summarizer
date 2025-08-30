@@ -112,7 +112,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
         transcription = result.get("transcription", "")
         summary = result.get("summary", "")
     except Exception as e:
-        st.text("⚠️ JSON parse failed:", e)
+        st.write("⚠️ JSON parse failed:", e)
         # fallback if model outputs plain text
         transcription, summary = "", raw_text
 
