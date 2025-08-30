@@ -175,6 +175,7 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     transcription, summary = "", ""
     transcription_text, summary_text = separate_transcription_and_summary(raw_text)
     if transcription_text and summary_text:
+        st.write("the transcription is ",transcription_text)
         transcription = transcription_text
         summary = summary_text
     else:
