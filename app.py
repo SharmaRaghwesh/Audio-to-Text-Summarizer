@@ -44,16 +44,23 @@ PROMPTS = {
     
     Then provide a structured summary in this format:
 
-    📌 **Meeting Summary**
-    - Purpose
-    - Key Topics Discussed
-    - Major Decisions
+    📌 Meeting Summary
+    - Purpose: <purpose goes here>
+    - Key Topics Discussed:
+      - <topic 1>
+      - <topic 2>
+    - Major Decisions:
+      - <decision 1>
+      - <decision 2>
+    
+    ✅ Action Items
+    - <task> → <person>, <deadline>
+    
+    💡 Follow-ups Needed
+    - <item 1>
+    - <item 2>
 
-    ✅ **Action Items**
-    - [Task] → [Person Responsible], [Deadline if mentioned]
-
-    💡 **Follow-ups Needed**
-    - List unclear points or open questions
+    Always start a new line for each item. Use "-" for bullets and line breaks for clarity.
 
     Keep the notes concise, professional, and easy to scan.
     """,
