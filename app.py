@@ -96,7 +96,53 @@ def safe_extract_json(text: str):
         return json.loads(json_str)
     except json.JSONDecodeError as e:
         print("⚠️ Still invalid JSON:", e)
-        return None
+        return Nonedef separate_transcription_and_summary(data_string):
+    """
+    Separates the transcription and meeting summary from a single string
+    based on the '📌 **Meeting Summary**' delimiter.
+
+    Args:
+        data_string (str): The combined string containing the transcription
+                           and the meeting summary.
+
+    Returns:
+        tuple: A tuple containing two strings: (transcription, summary).
+               Returns (None, None) if the delimiter is not found.
+    """
+    delimiter = "📌 **Meeting Summary**"
+    
+    # Check if the delimiter exists in the string
+    if delimiter in data_string:
+        # Split the string at the delimiter
+        parts = data_string.split(delimiter, 1)
+        
+        # The transcription is the first part, inside the JSON.
+        # We need to find the content of the "transcription" key.
+        json_part = parts[0].strip()
+        
+        try:
+            # Safely extract the transcription from the JSON string.
+            # This is a bit complex as the JSON is embedded in a text block.
+            # A more robust method would be to use a regular expression.
+            start_index = json_part.find('{')
+            end_index = json_part.rfind('}') + 1
+            json_content = json_part[start_index:end_index]
+            
+            # Load the JSON and get the transcription
+            data = json.loads(json_content)
+            transcription = data.get("transcription", "Transcription key not found.")
+            
+        except (json.JSONDecodeError, IndexError) as e:
+            transcription = f"Could not parse transcription from JSON: {e}"
+        
+        # The summary is the second part
+        summary = delimiter + parts[1].strip()
+        
+        return transcription, summary
+    else:
+        print("Delimiter '📌 **Meeting Summary**' not found in the string.")
+        return None, None
+
 
 # --- Transcribe & Summarize Function ---
 def transcribe_and_summarize(audio_file, api_key, style="business"):
@@ -126,15 +172,21 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
 
     # Try to parse JSON response
     transcription, summary = "", ""
-    try:
-        result = safe_extract_json(raw_text)
-        st.text(result)
-        transcription = result.get("transcription", "")
-        summary = result.get("summary", "")
-    except Exception as e:
-        st.write("⚠️ JSON parse failed:", e)
-        # fallback if model outputs plain text
-        transcription, summary = "", raw_text
+    transcription_text, summary_text = separate_transcription_and_summary(raw_text)
+    if transcription_text and summary_text:
+        transcription = transcription_text
+        summary = summary_text
+    else:
+        transcription,summary = "", raw_text
+    # try:
+    #     result = safe_extract_json(raw_text)
+    #     st.text(result)
+    #     transcription = result.get("transcription", "")
+    #     summary = result.get("summary", "")
+    # except Exception as e:
+    #     st.write("⚠️ JSON parse failed:", e)
+    #     # fallback if model outputs plain text
+    #     transcription, summary = "", raw_text
 
     return transcription, summary
 
