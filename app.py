@@ -77,10 +77,26 @@ PROMPTS = {
     """
 }
 
-def safe_json_loads(s: str):
-    # Remove unescaped control characters
-    s = re.sub(r"[\x00-\x1f\x7f]", "", s)
-    return json.loads(s)
+def safe_extract_json(text: str):
+    # Extract first {...} block using regex
+    match = re.search(r"\{[\s\S]*\}", text)
+    if not match:
+        return None
+    
+    json_str = match.group(0)
+
+    # Remove control characters
+    json_str = re.sub(r"[\x00-\x1f\x7f]", "", json_str)
+
+    # Escape unescaped quotes inside transcription/summary
+    # Replace " with ' inside the transcription content safely
+    json_str = re.sub(r'(?<!\\)"', '\\"', json_str)
+
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print("⚠️ Still invalid JSON:", e)
+        return None
 
 # --- Transcribe & Summarize Function ---
 def transcribe_and_summarize(audio_file, api_key, style="business"):
@@ -99,18 +115,19 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
     
 
     # Clean ```json fences if present
-    cleaned = raw_text.strip()
-    if cleaned.startswith("```"):
-        # Take only the inside of the first fenced block
-        parts = cleaned.split("```")
-        if len(parts) >= 2:
-            cleaned = parts[1]
-        cleaned = cleaned.replace("json", "", 1).strip()
+    # cleaned = raw_text.strip()
+    # cleaned = safe_extract_json(raw_text)
+    # if cleaned.startswith("```"):
+    #     # Take only the inside of the first fenced block
+    #     parts = cleaned.split("```")
+    #     if len(parts) >= 2:
+    #         cleaned = parts[1]
+    #     cleaned = cleaned.replace("json", "", 1).strip()
 
     # Try to parse JSON response
     transcription, summary = "", ""
     try:
-        result = safe_json_loads(cleaned)
+        result = safe_extract_json(raw_text)
         st.text(result)
         transcription = result.get("transcription", "")
         summary = result.get("summary", "")
