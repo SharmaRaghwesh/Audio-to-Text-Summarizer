@@ -96,7 +96,8 @@ def safe_extract_json(text: str):
         return json.loads(json_str)
     except json.JSONDecodeError as e:
         print("⚠️ Still invalid JSON:", e)
-        return Nonedef separate_transcription_and_summary(data_string):
+        return None
+def separate_transcription_and_summary(data_string):
     """
     Separates the transcription and meeting summary from a single string
     based on the '📌 **Meeting Summary**' delimiter.
