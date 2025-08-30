@@ -90,30 +90,24 @@ def transcribe_and_summarize(audio_file, api_key, style="business"):
         prompt
     ], generation_config={"temperature": 1.0})
 
+    # Get raw model text
+    raw_text = getattr(response, "text", None) or str(response)
 
-     # If response.text is JSON, parse it
-    try:
-        data = json.loads(response.text)
-        # Print transcription
-        print("📝 Transcription:\n")
-        print(data.get("transcription", "No transcription found"))
-        print("\n" + "="*80 + "\n")
-        # Print summary
-        print("📌 Meeting Summary:\n")
-        print(data.get("summary", "No summary found"))
-    except json.JSONDecodeError:
-        # If it's not JSON, just print raw text
-        print(response.text)
+    # Clean ```json fences if present
+    cleaned = raw_text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.strip("`")
+        cleaned = cleaned.replace("json", "", 1).strip()
 
     # Try to parse JSON response
     transcription, summary = "", ""
     try:
-        result = json.loads(response.text)
+        result = json.loads(cleaned)
         transcription = result.get("transcription", "")
         summary = result.get("summary", "")
     except Exception:
         # fallback if model outputs plain text
-        transcription, summary = "", response.text
+        transcription, summary = "", raw_text
 
     return transcription, summary
 
